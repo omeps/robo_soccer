@@ -35,7 +35,7 @@ class Motor:
 class Robot:
     def __init__(self, motors: list[Motor] ):
         self.motors = motors
-        self.dirs = [Vec2(-1,0), Vec2(1/2,math.sqrt(3)/2), Vec2(1/2,-math.sqrt(3)/2)]
+        self.dirs = [Vec2(-math.sqrt(3)/2,-1/2), Vec2(0,1), Vec2(math.sqrt(3)/2,-1/2)]
     def toggle_torque(self, to_on: bool):
         for motor in self.motors:
             motor.toggle_torque(to_on) 
@@ -43,9 +43,9 @@ class Robot:
         vels = [cos(d,direction) for d in self.dirs]
         largest_vel = abs(max(vels, key = lambda x: abs(x)))
         vels = [265*vel/largest_vel for vel in vels]
-        print(vels)
         for i in range(len(self.motors)):
             self.motors[i].set_velocity(vels[i])
+        return sum([vel*vel for vel in vels])
     def turn(self, velocity: float):
         for i in range(len(self.motors)):
             self.motors[i].set_velocity(velocity)
@@ -57,8 +57,9 @@ class Robot:
         vel_size = sum([vel*vel for vel in vels])
         tot = [vels[i]/vel_size + rotation/265 for i in range(len(vels))]
         largest = abs(max(tot, key = lambda x: abs(x)))
+        packetHandler = PacketHandler(PROTOCOL_VERSION)
         [self.motors[i].set_velocity(265*tot[i]/largest) for i in range(len(vels))]
-        return largest/rotation * 265
+        return largest/abs(rotation)*265*3.12
 def test():
     motors = [Motor(2),Motor(3)]
     for m in motors:
